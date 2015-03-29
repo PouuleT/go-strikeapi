@@ -162,3 +162,60 @@ func TestCountTorrents(t *testing.T) {
 		t.Errorf("Bad count response not properly set")
 	}
 }
+
+func TestGetTopTorrents(t *testing.T) {
+	rawHTMLResponse := `{"results":100,"statuscode":200,"responsetime":0.155,"torrents":[{"torrent_hash":"7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85","torrent_title":"Men2019s Fitness Workout Manual 2015","torrent_category":"Books","sub_category":"","seeds":993,"leeches":31,"file_count":4,"size":127213240.32,"download_count":52,"upload_date":"Dec  9, 2014","uploader_username":"Mantesh","page":"https://getstrike.net/torrents/7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85","rss_feed":"https://getstrike.net/torrents/7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85?rss=1","magnet_uri":"magnet:?xt=urn:btih:7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85&dn=Men%E2%80%99s+Fitness+Workout+Manual+2015&tr=udp://open.demonii.com:1337&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969&tr=udp://exodus.desync.com:6969"},{"torrent_hash":"6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088","torrent_title":"Marvel NOW","torrent_category":"Books","sub_category":"Comics","seeds":790,"leeches":458,"file_count":22,"size":905141288.96,"download_count":5,"upload_date":"Mar 25, 2015","uploader_username":"Nemesis44","page":"https://getstrike.net/torrents/6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088","rss_feed":"https://getstrike.net/torrents/6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088?rss=1","magnet_uri":"magnet:?xt=urn:btih:6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088&dn=Marvel+NOW&tr=udp://open.demonii.com:1337&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969&tr=udp://exodus.desync.com:6969"}]}`
+
+	// Fake server with a fake answer
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, rawHTMLResponse)
+	}))
+	defer ts.Close()
+
+	APIEndpoint = ts.URL
+
+	torrentList, err := GetTopTorrents("Books")
+	if err != nil {
+		t.Errorf("Error counting torrents")
+	}
+
+	// Expected result
+	expectedTorrents := []Torrent{
+		{
+			Title:            "Men2019s Fitness Workout Manual 2015",
+			Hash:             "7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85",
+			Category:         "Books",
+			SubCategory:      "",
+			Seeds:            993,
+			Leeches:          31,
+			FileCount:        4,
+			DownloadCount:    52,
+			Size:             127213240.32,
+			UploadDate:       "Dec  9, 2014",
+			UploaderUsername: "Mantesh",
+			Page:             "https://getstrike.net/torrents/7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85",
+			RSSFeed:          "https://getstrike.net/torrents/7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85?rss=1",
+			MagnetURI:        "magnet:?xt=urn:btih:7DA0DCEF9F4F78BB2B75CB74190D31C01E547D85&dn=Men%E2%80%99s+Fitness+Workout+Manual+2015&tr=udp://open.demonii.com:1337&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969&tr=udp://exodus.desync.com:6969",
+		},
+		{
+			Title:            "Marvel NOW",
+			Hash:             "6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088",
+			Category:         "Books",
+			SubCategory:      "Comics",
+			Seeds:            790,
+			Leeches:          458,
+			FileCount:        22,
+			DownloadCount:    5,
+			Size:             905141288.96,
+			UploadDate:       "Mar 25, 2015",
+			UploaderUsername: "Nemesis44",
+			Page:             "https://getstrike.net/torrents/6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088",
+			RSSFeed:          "https://getstrike.net/torrents/6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088?rss=1",
+			MagnetURI:        "magnet:?xt=urn:btih:6C32B66CEE44B7A0E3E42E22ACF5E77BF3218088&dn=Marvel+NOW&tr=udp://open.demonii.com:1337&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969&tr=udp://exodus.desync.com:6969",
+		},
+	}
+	// Expected result
+	if reflect.DeepEqual(torrentList, expectedTorrents) == false {
+		t.Errorf("Torrent result not properly set")
+	}
+}

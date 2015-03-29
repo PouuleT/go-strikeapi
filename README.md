@@ -1,6 +1,8 @@
 Strike API client
 =========
 
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/PouuleT/go-strikeapi)
+
 This is a wrapper around the _Strike API v2_ (https://getstrike.net/) written in go and based on their documentation [documentation](https://getstrike.net/api/)
 
 ## Search Torrents

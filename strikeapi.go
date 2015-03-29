@@ -368,6 +368,36 @@ func GetDownloadLink(hash string) (string, error) {
 	return response.Message, nil
 }
 
+// GetTopTorrents will get a list of top torrents
+func GetTopTorrents(category string) ([]Torrent, error) {
+	// Set the category to all by default
+	if category == "" {
+		category = "all"
+	}
+	// Generate URL
+	u, err := url.Parse(fmt.Sprintf("%s/torrents/top/", APIEndpoint))
+	if err != nil {
+		return nil, err
+	}
+	urlValues := &url.Values{}
+	urlValues.Add("category", category)
+
+	u.RawQuery = urlValues.Encode()
+	resp, err := http.Get(u.String())
+	if err != nil {
+		log.Println("Counldn't make the GET ", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Parse the response
+	response, err := newResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+	return response.Torrents, nil
+}
+
 // newResponse will parse a Response struct
 func newResponse(resp *http.Response) (*Response, error) {
 	body, err := ioutil.ReadAll(resp.Body)
